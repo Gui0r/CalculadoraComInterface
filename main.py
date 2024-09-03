@@ -1,10 +1,11 @@
 import tkinter as tk
+from tkinter import ttk
 
 class Calculadora:
     def __init__(self, root):
         self.root = root
         self.root.title("Calculadora")
-        self.root.geometry("375x500")
+        self.root.geometry("400x500")
         self.root.resizable(0, 0)
         self.root.configure(bg="#000000")
         
@@ -32,8 +33,8 @@ class Calculadora:
         self.criar_botao_igual()
     
     def criar_frame_display(self):
-        frame = tk.Frame(self.root, height=221, bg="#000000")
-        frame.pack(expand=True, fill="both")
+        frame = tk.Frame(self.root, height=100, bg="#000000")
+        frame.pack(expand=False, fill="both")
         return frame
     
     def criar_labels_display(self):
@@ -52,43 +53,40 @@ class Calculadora:
     def criar_frame_botoes(self):
         frame = tk.Frame(self.root)
         frame.pack(expand=True, fill="both")
+        for i in range(5):
+            frame.grid_rowconfigure(i, weight=1)
+            frame.grid_columnconfigure(i, weight=1)
         return frame
     
     def adicionar_valor(self, valor):
         self.atual_expressao += str(valor)
         self.atualizar_display()
 
+    def criar_botao_estilizado(self, text, row, column, command, bg_color, fg_color):
+        button = tk.Button(self.botao_frame, text=text, bg=bg_color, fg=fg_color, font=("Arial", 24, "bold"),
+                           borderwidth=0, command=command)
+        button.grid(row=row, column=column, sticky=tk.NSEW, padx=5, pady=5)
+        button.configure(width=1, height=1)
+
     def criar_botoes_digitos(self):
         for digito, grid_value in self.digitos.items():
-            button = tk.Button(self.botao_frame, text=str(digito), bg="#505050", fg="#FFFFFF", font=("Arial", 24, "bold"),
-                               borderwidth=0, command=lambda x=digito: self.adicionar_valor(x))
-            button.grid(row=grid_value[0], column=grid_value[1], sticky=tk.NSEW)
+            self.criar_botao_estilizado(digito, grid_value[0], grid_value[1], 
+                                        lambda x=digito: self.adicionar_valor(x), "#505050", "#FFFFFF")
 
     def criar_botoes_operadores(self):
         i = 0
         for operador, simbolo in self.operadores.items():
-            button = tk.Button(self.botao_frame, text=simbolo, bg="#FF9500", fg="#FFFFFF", font=("Arial", 24),
-                               borderwidth=0, command=lambda x=operador: self.adicionar_operador(x))
-            button.grid(row=i, column=3, sticky=tk.NSEW)
+            self.criar_botao_estilizado(simbolo, i, 3, 
+                                        lambda x=operador: self.adicionar_operador(x), "#FF9500", "#FFFFFF")
             i += 1
     
     def criar_botoes_especiais(self):
-        button_clear = tk.Button(self.botao_frame, text="C", bg="#A5A5A5", fg="#000000", font=("Arial", 24),
-                                 borderwidth=0, command=self.limpar)
-        button_clear.grid(row=0, column=0, sticky=tk.NSEW)
-        
-        button_negativo = tk.Button(self.botao_frame, text="+/-", bg="#A5A5A5", fg="#000000", font=("Arial", 24),
-                                    borderwidth=0, command=self.mudar_sinal)
-        button_negativo.grid(row=0, column=1, sticky=tk.NSEW)
-        
-        button_porcentagem = tk.Button(self.botao_frame, text="%", bg="#A5A5A5", fg="#000000", font=("Arial", 24),
-                                       borderwidth=0, command=self.porcentagem)
-        button_porcentagem.grid(row=0, column=2, sticky=tk.NSEW)
+        self.criar_botao_estilizado("C", 0, 0, self.limpar, "#A5A5A5", "#000000")
+        self.criar_botao_estilizado("+/-", 0, 1, self.mudar_sinal, "#A5A5A5", "#000000")
+        self.criar_botao_estilizado("%", 0, 2, self.porcentagem, "#A5A5A5", "#000000")
 
     def criar_botao_igual(self):
-        button_igual = tk.Button(self.botao_frame, text="=", bg="#FF9500", fg="#FFFFFF", font=("Arial", 24),
-                                 borderwidth=0, command=self.calcular)
-        button_igual.grid(row=4, column=3, sticky=tk.NSEW)
+        self.criar_botao_estilizado("=", 4, 3, self.calcular, "#FF9500", "#FFFFFF")
     
     def adicionar_operador(self, operador):
         self.total_expressao += self.atual_expressao + operador
@@ -101,12 +99,14 @@ class Calculadora:
         self.atualizar_display()
     
     def mudar_sinal(self):
-        self.atual_expressao = str(-1 * float(self.atual_expressao))
-        self.atualizar_display()
+        if self.atual_expressao:
+            self.atual_expressao = str(-1 * float(self.atual_expressao))
+            self.atualizar_display()
     
     def porcentagem(self):
-        self.atual_expressao = str(float(self.atual_expressao) / 100)
-        self.atualizar_display()
+        if self.atual_expressao:
+            self.atual_expressao = str(float(self.atual_expressao) / 100)
+            self.atualizar_display()
     
     def calcular(self):
         self.total_expressao += self.atual_expressao
@@ -121,10 +121,4 @@ class Calculadora:
 if __name__ == "__main__":
     root = tk.Tk()
     calc = Calculadora(root)
-
-    # Configurar redimensionamento automático para os botões
-    for i in range(5):
-        root.grid_rowconfigure(i, weight=1)
-        root.grid_columnconfigure(i, weight=1)
-
     root.mainloop()
